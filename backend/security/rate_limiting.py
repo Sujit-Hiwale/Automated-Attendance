@@ -1,19 +1,31 @@
 """
-Rate Limiting and Brute-Force Protection
-Implements per-IP and per-user rate limiting with exponential lockout
+Enhanced Rate Limiting and Brute-Force Protection
+Implements per-IP and per-user rate limiting with Redis backend and exponential lockout
 """
 import time
 import json
+import os
 from datetime import datetime, timedelta
 from typing import Optional, Dict
 from functools import wraps
 from flask import request, jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from dotenv import load_dotenv
+import logging
+
+# Import our enhanced brute force protection
+try:
+    from .bruteforce import BruteForceProtection
+except ImportError:
+    BruteForceProtection = None
+
+load_dotenv()
+logger = logging.getLogger(__name__)
 
 
 class RateLimitManager:
-    """Manages rate limiting and brute-force protection"""
+    """Enhanced rate limiting and brute-force protection with Redis backend"""
     
     def __init__(self, redis_url: Optional[str] = None):
         """
@@ -22,12 +34,26 @@ class RateLimitManager:
         Args:
             redis_url: Redis connection URL (optional, uses in-memory if not provided)
         """
-        self.redis_url = redis_url
+        self.redis_url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379/0")
         self.failed_attempts: Dict[str, list] = {}  # In-memory fallback
         self.lockouts: Dict[str, datetime] = {}
         
-        # Exponential backoff settings
-        self.max_attempts = 5
+        # Rate limiting configuration
+        self.login_rate_limit = os.getenv("LOGIN_RATE_LIMIT", "20 per minute")
+        self.registration_rate_limit = os.getenv("REGISTRATION_RATE_LIMIT", "5 per hour")
+        self.api_rate_limit = os.getenv("API_RATE_LIMIT", "100 per minute")
+        
+        # Initialize Redis-backed brute force protection if available
+        self.brute_force_protection = None
+        if BruteForceProtection:
+            try:
+                self.brute_force_protection = BruteForceProtection()
+                logger.info("Redis-backed brute force protection initialized")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Redis brute force protection: {e}")
+        
+        # Fallback exponential backoff settings for in-memory mode
+        self.max_attempts = int(os.getenv("MAX_LOGIN_FAILS", 5))
         self.lockout_durations = [
             60,      # 1 minute after 5 failures
             300,     # 5 minutes after 10 failures
