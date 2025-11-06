@@ -30,7 +30,7 @@ export default function WeeklyAttendance() {
   const fetchWeekData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`https://10.68.222.139:5000/api/weekly-attendance?offset=${weekOffset}`);
+      const res = await fetch(`https://automated-attendance-6rl6.onrender.com/api/weekly-attendance?offset=${weekOffset}`);
       const result = await res.json();
       setLabels(result.dates || []); // fallback if empty
       setData(result.counts || []);

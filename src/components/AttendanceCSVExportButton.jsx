@@ -5,7 +5,7 @@ export default function AttendanceCSVExportButton() {
   const handleExport = async () => {
     try {
       // 1️⃣ Fetch all attendance records from Flask
-      const res = await axios.get("https://10.68.222.139:5000/api/attendance-all", {
+      const res = await axios.get("https://automated-attendance-6rl6.onrender.com/api/attendance-all", {
         withCredentials: false,
       });
 

@@ -11,7 +11,7 @@ export default function TodayAbsent() {
   useEffect(() => {
     const fetchAbsentCount = async () => {
       try {
-        const res = await fetch("https://10.68.222.139:5000/api/students-absent-today");
+        const res = await fetch("https://automated-attendance-6rl6.onrender.com/api/students-absent-today");
         const data = await res.json();
         setCount(data.count);
       } catch (err) {

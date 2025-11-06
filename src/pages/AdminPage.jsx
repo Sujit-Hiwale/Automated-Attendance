@@ -24,7 +24,7 @@ export default function AdminPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("https://10.68.222.139:5000/api/verify", {
+      const response = await fetch("https://automated-attendance-6rl6.onrender.com/api/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),

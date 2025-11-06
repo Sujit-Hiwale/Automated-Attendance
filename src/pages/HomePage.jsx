@@ -39,7 +39,7 @@ export default function HomePage() {
       const imageData = canvas.toDataURL("image/jpeg");
 
       try {
-        const res = await axios.post("https://10.68.222.139:5000/recognize", { image: imageData });
+        const res = await axios.post("https://automated-attendance-6rl6.onrender.com/recognize", { image: imageData });
         const faces = res.data.faces;
 
         if (faces.length > 0) {
